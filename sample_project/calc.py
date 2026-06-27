@@ -1,16 +1,20 @@
-﻿def hello(name: str, greeting: str = "Hello") -> str:
-    """Say hello with a custom greeting."""
-    return f"{greeting} {name}"
+﻿def hello(name: str) -> str:
+    """Say hello."""
+    return f"Hello {name}"
 
 
-def add(a: int, b: int = 0) -> int:
-    """Add two numbers."""
-    return a + b
+def goodbye(name: str) -> str:
+    """Say goodbye."""
+    return f"Goodbye {name}"
 
 
 class Calculator:
     """A simple calculator."""
 
-    def multiply(self, x: float, y: float, precision: int = 2) -> float:
-        """Multiply two numbers with precision."""
-        return round(x * y, precision)
+    def multiply(self, x: float, y: float) -> float:
+        """Multiply two numbers."""
+        return x * y
+
+    def divide(self, a: float, b: float, precision: int = 2) -> float:
+        """Divide two numbers with precision."""
+        return round(a / b, precision)

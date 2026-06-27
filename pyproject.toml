@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docsync-cli"
-version = "0.1.0"
+version = "0.1.1"
 description = "Keep project documentation synchronized with code changes"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -21,6 +21,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Documentation",
     "Topic :: Software Development :: Documentation",
+]
+dependencies = [
+    "requests>=2.31",
 ]
 
 [project.scripts]

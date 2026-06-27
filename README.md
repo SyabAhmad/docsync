@@ -1,8 +1,8 @@
 # DocSync CLI
 
-Keep project documentation automatically synchronized with code changes.
+**Keep your Python project documentation automatically synchronized with code changes.**
 
-DocSync scans your Python project, parses the public API using AST, detects changes, and regenerates only the affected parts of your README and CHANGELOG via LLM.
+DocSync scans your Python files using Git, parses public APIs with AST, detects changes, and rewrites only the affected parts of your README and CHANGELOG via LLM (Groq or OpenAI).
 
 ---
 
@@ -12,7 +12,7 @@ DocSync scans your Python project, parses the public API using AST, detects chan
 pip install docsync-cli
 ```
 
-Requires Python 3.9+.
+Requires Python 3.9+. Set `GROQ_API_KEY` or `OPENAI_API_KEY` in your environment.
 
 ---
 
@@ -22,13 +22,12 @@ Requires Python 3.9+.
 # 1. Initialize in your project root
 docsync init
 
-# 2. Scan changed files and snapshot the API
-docsync scan
+# 2. Make some code changes...
 
-# 3. Preview what changed
+# 3. See what API changes were detected
 docsync diff
 
-# 4. Regenerate README and CHANGELOG
+# 4. Regenerate README and CHANGELOG automatically
 docsync update
 ```
 
@@ -38,7 +37,7 @@ docsync update
 
 ### `docsync init`
 
-Creates `.docsync/config.json` and `.docsync/api_snapshot.json` in your project root.
+Creates the `.docsync/` directory with configuration and snapshot files.
 
 ```bash
 docsync init
@@ -46,7 +45,7 @@ docsync init
 
 ### `docsync scan`
 
-Finds changed Python files via Git, parses public functions/classes/methods with AST, compares against the previous snapshot, and saves the new snapshot.
+Scans changed Python files, parses their public API, and updates the snapshot. Useful after pulling changes or switching branches.
 
 ```bash
 docsync scan
@@ -54,34 +53,34 @@ docsync scan
 
 ### `docsync diff`
 
-Shows detected API changes without modifying anything. Useful for review before running `update`.
+Compares your working tree against the last saved snapshot and displays added, removed, or modified APIs.
 
 ```bash
 docsync diff
 ```
 
-Output:
+Example output:
 
 ```
 ## API Changes Detected
 
 ### src/predict.py
-  [function_added] src/predict.py :: predict - Added `predict(image, threshold)`
   [parameter_added] src/predict.py :: predict - Parameter `threshold = 0.5` added
+  [function_added] src/predict.py :: batch_predict - Added `batch_predict(images)`
 ```
 
 ### `docsync update`
 
-Sends detected changes to an LLM (Groq by default) to rewrite only the affected parts of README.md and CHANGELOG.md.
+Sends detected changes to an LLM to rewrite only the affected parts of your docs.
 
 ```bash
-# Use LLM for both README and CHANGELOG
+# Full LLM mode — rewrites both README and CHANGELOG
 docsync update
 
-# Use LLM for README, simple local changelog
+# Local mode — simple changelog generation (no API key needed)
 docsync update --simple
 
-# Preview changes without writing
+# Preview changes without writing anything
 docsync update --dry-run
 ```
 
@@ -93,7 +92,6 @@ Generated `.docsync/config.json`:
 
 ```json
 {
-  "version": "1.0",
   "llm_provider": "groq",
   "llm_model": "meta-llama/llama-4-scout-17b-16e-instruct",
   "llm_temperature": 0.3,
@@ -107,12 +105,12 @@ Generated `.docsync/config.json`:
 | Key | Default | Description |
 |---|---|---|
 | `llm_provider` | `"groq"` | `"groq"` or `"openai"` |
-| `llm_model` | `"meta-llama/llama-4-scout-17b-16e-instruct"` | Model name for the provider |
-| `llm_temperature` | `0.3` | LLM temperature (lower = more deterministic) |
+| `llm_model` | `"meta-llama/llama-4-scout-17b-16e-instruct"` | Model name |
+| `llm_temperature` | `0.3` | LLM temperature |
 | `include_patterns` | `["*.py"]` | Glob patterns for files to scan |
 | `exclude_patterns` | `[...]` | Glob patterns to exclude |
-| `readme_path` | `"README.md"` | Path to README relative to project root |
-| `changelog_path` | `"CHANGELOG.md"` | Path to CHANGELOG relative to project root |
+| `readme_path` | `"README.md"` | Path to README |
+| `changelog_path` | `"CHANGELOG.md"` | Path to CHANGELOG |
 
 ---
 
@@ -120,73 +118,65 @@ Generated `.docsync/config.json`:
 
 | Variable | Required | Description |
 |---|---|---|
-| `GROQ_API_KEY` | Yes (if using Groq) | Get one at [console.groq.com](https://console.groq.com) |
-| `OPENAI_API_KEY` | Yes (if using OpenAI) | Get one at [platform.openai.com](https://platform.openai.com) |
+| `GROQ_API_KEY` | For Groq | Get one at [console.groq.com](https://console.groq.com) |
+| `OPENAI_API_KEY` | For OpenAI | Get one at [platform.openai.com](https://platform.openai.com) |
 
 ---
 
 ## How It Works
 
 ```
-Developer changes code
+You change Python code
         |
-DocSync scans changed files (git diff)
+Git detects changed files
         |
-Parses Python code using AST
+AST parser extracts public API:
+  - Functions (name, params, defaults, return type)
+  - Classes (name, bases, methods)
         |
-Extracts public functions, classes, methods, parameters
+Diff engine compares against snapshot
         |
-Compares with previous snapshot
+LLM rewrites only outdated sections
         |
-Detects added/removed/modified APIs
-        |
-Finds outdated README sections
-        |
-Uses LLM to rewrite only affected parts
-        |
-Updates README.md + CHANGELOG.md
+README.md + CHANGELOG.md updated
 ```
 
-### What Gets Tracked
+### What's tracked
 
-- Public functions (`def func(...)`)
-- Public classes (`class MyClass(...)`)
-- Public methods (non-underscore methods on public classes)
-- Function parameters and their defaults
-- Return type annotations
+- **Public functions** — `def func(...)` without leading `_`
+- **Public classes** — `class MyClass(...)` without leading `_`
+- **Public methods** — non-underscore methods on public classes
+- **Parameters** — names, defaults, and return annotations
 
-Private members (starting with `_`) are ignored.
+Private/dunder members (`_`, `__`) are ignored.
 
 ---
 
-## Example
+## Example Walkthrough
 
-**Before — code change:**
+**Before — your code:**
 
 ```python
-# src/model.py
 def predict(image):
-    """Run prediction on an image."""
+    """Run prediction."""
     ...
 ```
 
-**After — code change:**
+**After — you add a parameter:**
 
 ```python
-# src/model.py
 def predict(image, threshold=0.5):
     """Run prediction with confidence threshold."""
     ...
 ```
 
-**`docsync diff` output:**
+**Run `docsync diff`:**
 
 ```
-[function_modified] src/model.py :: predict - File modified
-[parameter_added] src/model.py :: predict - Parameter `threshold = 0.5` added
+[parameter_added] :: predict - Parameter `threshold = 0.5` added
 ```
 
-**`docsync update` rewrites README code examples** to reflect the new signature, and appends to CHANGELOG:
+**Run `docsync update`** — it updates code examples in your README and appends to CHANGELOG:
 
 ```markdown
 ## v0.2.0
@@ -197,6 +187,35 @@ def predict(image, threshold=0.5):
 
 ---
 
-## Project Status
+## Real Project Example
 
-Early-stage MVP. Currently supports Python projects with Git tracking.
+```bash
+# Initialize tracking
+docsync init
+
+# Edit your Python code...
+# Add new functions, change parameters, etc.
+
+# See what changed
+docsync diff
+
+# If changes look good, regenerate docs
+docsync update --simple
+# Or with LLM for smarter rewrites
+docsync update
+```
+
+---
+
+## Limitations
+
+- **Python only** (MVP scope)
+- **Git required** for change detection
+- **LLM mode** needs a valid API key
+- Best suited for library-style projects with clear public APIs
+
+---
+
+## License
+
+MIT
