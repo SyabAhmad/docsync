@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "docsync"
+name = "docsync-cli"
 version = "0.1.0"
 description = "Keep project documentation synchronized with code changes"
 readme = "README.md"

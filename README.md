@@ -1,4 +1,4 @@
-# DocSync
+# DocSync CLI
 
 Keep project documentation automatically synchronized with code changes.
 
