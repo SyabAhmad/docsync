@@ -4,8 +4,8 @@ from pathlib import Path
 
 DEFAULT_CONFIG = {
     "version": "1.0",
-    "llm_provider": "openai",
-    "llm_model": "gpt-4o-mini",
+    "llm_provider": "groq",
+    "llm_model": "meta-llama/llama-4-scout-17b-16e-instruct",
     "llm_temperature": 0.3,
     "include_patterns": ["*.py"],
     "exclude_patterns": ["*test*", "*migration*", ".venv/*", "venv/*", "__pycache__/*"],

@@ -115,7 +115,7 @@ class ASTParser:
         if not full_path.exists():
             return None
         try:
-            source = full_path.read_text(encoding="utf-8")
+            source = full_path.read_text(encoding="utf-8-sig")
         except Exception:
             return None
         try:

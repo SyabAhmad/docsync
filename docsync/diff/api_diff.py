@@ -44,7 +44,8 @@ class Change:
         }
 
     def __str__(self) -> str:
-        return f"[{self.type.value}] {self.file_path} :: {self.symbol_name} — {self.details}"
+        symbol = f" :: {self.symbol_name}" if self.symbol_name else ""
+        return f"[{self.type.value}] {self.file_path}{symbol} - {self.details}"
 
 
 @dataclass

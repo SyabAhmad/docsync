@@ -110,7 +110,8 @@ def cmd_update(args):
         previous = snapshot.get_file(current.file_path)
         changes = api_diff.diff_file(previous, current)
         all_changes.changes.extend(changes)
-        snapshot.update_file(current)
+        if not args.dry_run:
+            snapshot.update_file(current)
 
     if not all_changes.has_changes():
         print("No API changes detected. Nothing to update.")
@@ -139,8 +140,11 @@ def cmd_update(args):
     else:
         changelog.update(all_changes, dry_run=args.dry_run)
 
-    snapshot.save()
-    print("\nDocumentation updated successfully.")
+    if not args.dry_run:
+        snapshot.save()
+        print("\nDocumentation updated successfully.")
+    else:
+        print("\nDRY RUN — Snapshot not updated.")
 
 
 def main():
