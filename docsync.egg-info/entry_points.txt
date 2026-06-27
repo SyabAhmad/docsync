@@ -1,0 +1,2 @@
+[console_scripts]
+docsync = docsync.cli:main

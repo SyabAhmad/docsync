@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docsync"
+version = "0.1.0"
+description = "Keep project documentation synchronized with code changes"
+requires-python = ">=3.9"
+
+[project.scripts]
+docsync = "docsync.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["docsync*"]

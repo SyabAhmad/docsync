@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "llm_provider": "openai",
+  "llm_model": "gpt-4o-mini",
+  "llm_temperature": 0.3,
+  "include_patterns": [
+    "*.py"
+  ],
+  "exclude_patterns": [
+    "*test*",
+    "*migration*",
+    ".venv/*",
+    "venv/*",
+    "__pycache__/*"
+  ],
+  "snapshot_dir": ".docsync",
+  "readme_path": "README.md",
+  "changelog_path": "CHANGELOG.md",
+  "github_base_url": ""
+}
